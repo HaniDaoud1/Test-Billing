@@ -41,7 +41,8 @@ function SearchPage() {
 const searchTerm = String(search3)?.trim().toLowerCase() || "";
 
 const filteredClient = rowData?.filter((pro) =>
-  pro.customer.toLowerCase().includes(searchTerm)
+  pro.customer?.toLowerCase().includes(searchTerm) ||
+  pro.service?.toLowerCase().includes(searchTerm)
 );
 
 
