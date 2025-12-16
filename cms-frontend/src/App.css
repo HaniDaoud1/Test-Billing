@@ -1,0 +1,5 @@
+@import "tailwindcss";
+
+* {
+  font-family: 'Anton', sans-serif;
+}
