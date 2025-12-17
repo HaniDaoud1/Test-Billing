@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 export default function BillingTable() {
   const [rowData, setRowData] = useState([]);
   const navigate = useNavigate();
-  const isLargeScreen = window.innerWidth >= 1024;
+  const isLargeScreen = window.innerWidth >= 800;
 
 
   useEffect(() => {
