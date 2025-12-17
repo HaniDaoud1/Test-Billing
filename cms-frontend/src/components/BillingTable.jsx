@@ -1,12 +1,14 @@
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-quartz.css";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function BillingTable() {
   const [rowData, setRowData] = useState([]);
   const navigate = useNavigate();
+  const isLargeScreen = window.innerWidth >= 1024;
+
 
   useEffect(() => {
     fetch("https://test-billing-zpdr.onrender.com/api/billing")
@@ -24,53 +26,36 @@ export default function BillingTable() {
     setRowData((prev) => prev.filter((item) => item._id !== id));
   };
 
+  // Nested grid columns (per client)
+  const detailColumnDefs = useMemo(() => [
+    { field: "service", headerName: "Service", enableRowGroup: true, flex: isLargeScreen ? 1 : undefined, },
+    { field: "location", headerName: "Location", enableRowGroup: true, flex: isLargeScreen ? 1 : undefined, },
+    { field: "amount", headerName: "Amount (€)", aggFunc: "sum", flex: isLargeScreen ? 1 : undefined, },
+    { field: "date", headerName: "Date", flex: isLargeScreen ? 1 : undefined, },
+  ], []);
+
   const columnDefs = [
     {
       field: "customer",
+      filter: true,
       headerName: "Customer",
-      flex: 1,
-      minWidth: 90,
-    },
-    {
-      field: "service",
-      headerName: "Service",
-      flex: 1,
-      minWidth: 90,
-    },
-    {
-      field: "location",
-      headerName: "Location",
-      flex: 1,
-      minWidth: 90,
-    },
-    {
-      field: "amount",
-      headerName: "Amount (€)",
-      filter: "agNumberColumnFilter",
-      flex: 1,
-      minWidth: 90,
-    },
-    {
-      field: "date",
-      headerName: "Date",
-      flex: 1,
-      minWidth: 90,
-      hide: window.innerWidth < 768, // 👈 tablette
+       width: window.innerWidth / 2,
+      cellRenderer: "agGroupCellRenderer", 
     },
     {
       headerName: "Actions",
-      minWidth: 160,
+       width: window.innerWidth / 2,
       cellRenderer: (params) => (
-        <div className="flex flex-row gap-2 items-center justify-center h-full">
+        <div className="flex gap-2">
           <button
             onClick={() => navigate(`/update/${params.data._id}`)}
-            className="px-3 py-1 text-xs md:text-sm rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition w-full md:w-auto"
+            className="px-2  bg-emerald-500 text-white rounded hover:bg-emerald-600"
           >
             Update
           </button>
           <button
             onClick={() => deleteClient(params.data._id)}
-            className="px-3 py-1 text-xs md:text-sm rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition w-full md:w-auto"
+            className="px-2 bg-rose-500 text-white rounded hover:bg-rose-600"
           >
             Delete
           </button>
@@ -80,31 +65,46 @@ export default function BillingTable() {
   ];
 
   return (
-    <div className="w-full mt-34 sm:mt-40 ">
-  {/* Header */}
-        <h1 className="text-3xl sm:text-5xl mb-5  mx-5">Billings Table <span className="text-zinc-300 text-sm md:text-xl">at this moment</span></h1>
+    <div className="w-full mt-40">
+      <h1 className="text-3xl sm:text-5xl mb-5 mx-5">
+        Billing Table <span className="text-zinc-300 text-sm md:text-xl">per client</span>
+      </h1>
 
-
-  {/* Grid container */}
-  <div
-    className="ag-theme-quartz rounded-xl shadow-sm bg-green-50"
-    style={{ height: "70vh", width: "100%" }}
-  >
-    <AgGridReact
-      rowData={rowData}
-      columnDefs={columnDefs}
-      animateRows
-      headerHeight={52}
-      rowGroupPanelShow="always"
-      groupDisplayType="multipleColumns"
-      defaultColDef={{
-        sortable: true,
-        filter: true,
-        resizable: true,
-      }}
-    />
-  </div>
-</div>
-
+      <div
+        className="ag-theme-quartz rounded-xl shadow-sm bg-green-50"
+        style={{ height: "70vh", width: "100%" }}
+      >
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={columnDefs}
+          defaultColDef={{
+            sortable: true,
+            filter: true,
+            resizable: true,
+          }}
+          masterDetail={true} // enables nested grid
+          detailCellRendererParams={{
+            detailGridOptions: {
+              columnDefs: detailColumnDefs,
+              defaultColDef: {
+                sortable: true,
+                filter: true,
+                resizable: true,
+              },
+              animateRows: true,
+              rowGroupPanelShow: "always", // allows drag & drop grouping per client
+              groupDisplayType: "multipleColumns",
+            },
+            getDetailRowData: (params) => {
+              // Filter data for this client
+              params.successCallback(
+                rowData.filter((r) => r.customer === params.data.customer)
+              );
+            },
+          }}
+          animateRows
+        />
+      </div>
+    </div>
   );
 }

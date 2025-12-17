@@ -11,12 +11,20 @@ function SearchPage() {
     const dispatch = useDispatch();
     const [rowData, setRowData] = useState([]);
     const navigate = useNavigate();
+    const [expandedIds, setExpandedIds] = useState({});
 
      useEffect(() => {
     fetch("https://test-billing-zpdr.onrender.com/api/billing")
       .then(res => res.json())
       .then(data => setRowData(data));
   }, []);
+
+  const toggleDescription = (id) => {
+  setExpandedIds(prev => ({
+    ...prev,
+    [id]: !prev[id]
+  }));
+};
 
 
    const deleteClient = async (id) => {
@@ -64,7 +72,7 @@ const filteredClient = rowData?.filter((pro) =>
                       className="grid mt-10 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4  h-auto">
                         {(search3.length > 0 ? filteredClient : rowData)?.map((Client, index) => (
                          
-         <div key={index} className="bg-white m-auto hover:cursor-grab rounded-xl  h-auto  shadow-sm">
+         <div key={index} className={`bg-white mx-auto rounded-xl max-sm:w-[90%] w-80 xl:w-96 ${Client.description.length > 220 && !expandedIds[Client._id] ? 'pb-10' : ''} ${expandedIds[Client._id] ? 'h-auto ' : !expandedIds[Client._id] && Client.description.length > 220 ? 'h-128.5 md:h-141' :'h-125.5 md:h-138'} shadow-sm`}>
               
               <img
                 className=" bg-amber-50 h-50 lg:h-62.5 w-full object-cover rounded-t-xl"
@@ -78,6 +86,9 @@ const filteredClient = rowData?.filter((pro) =>
               <p className=" mx-2 line-clamp-4  text-black text-md">
                {Client.description}             
                </p>
+                <p className={`text-sm hover:cursor-pointer text-zinc-500 text-center ${Client.description.length < 220 ? 'hidden' : null}`}
+               onClick={() => toggleDescription(Client._id)}
+               >{expandedIds[Client._id] ? 'View less' : 'View more'}</p>
               <p className=" mx-2 mt-2 text-black text-xl">
                 Service : {Client.service}
               </p>

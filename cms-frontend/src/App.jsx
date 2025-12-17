@@ -1,9 +1,6 @@
 import Cards from "./components/Cards";
-import { useSelector } from "react-redux";
-import SearchPage from "./components/SearchPage";
 
 function App() {
-  const search = useSelector((state) => state.cart.search);
   return (<>
     <div className="bg-green-50 py-5 min-h-screen mt-31 sm:mt-36">
     <>
