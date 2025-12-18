@@ -11,16 +11,13 @@ import SearchPage from "./components/SearchPage";
 import { useSelector } from "react-redux";
 import Footer from "./components/Footer";
 import BillingTable from "./billingPage/page";
-import { ModuleRegistry } from 'ag-grid-community'; 
-import { RowGroupingModule } from 'ag-grid-enterprise'; 
-import { PivotModule } from 'ag-grid-enterprise'; 
-import { TreeDataModule } from 'ag-grid-enterprise'; 
-import { MasterDetailModule } from 'ag-grid-enterprise'; 
-import { ClientSideRowModelModule } from 'ag-grid-community'; 
 import "devextreme/dist/css/dx.light.css";
+import { ModuleRegistry } from 'ag-grid-community';
+import { ClientSideRowModelModule } from 'ag-grid-community';
 
-ModuleRegistry.registerModules([ ClientSideRowModelModule ]); 
-ModuleRegistry.registerModules([ RowGroupingModule, PivotModule, TreeDataModule, MasterDetailModule ]); 
+ModuleRegistry.registerModules([
+  ClientSideRowModelModule,
+]);
 
 
 
